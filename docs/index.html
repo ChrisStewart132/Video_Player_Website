@@ -33,10 +33,11 @@
 
             .container {
                 background-color: #0f0f0fcb; /* Darker background for the container */
-                border: 1px solid white;
+                border: 0px solid white;
                 border-radius: 5px;
-                padding: 5px;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Subtle shadow for depth */
+                padding-left: 20px;
+                padding-right: 20px;
+                box-shadow: 0 0 10px #000000cb; /* Subtle shadow for depth */
                 display: flex;
                 justify-content: center;
                 align-items: center;
@@ -51,13 +52,14 @@
             }
 
             .container.expanded {
+                box-shadow: 0 0 20px #0f0f0fcb; /* Subtle shadow for depth */
                 position: absolute; /* Ensure it can be positioned relative to the viewport */
                 top: 50%; /* Center vertically */
                 left: 50%; /* Center horizontally */
                 transform: translate(-50%, -50%) scale(1.0); /* Scale and move to the center of the viewport */
                 z-index: 10; /* Ensure it appears above other containers */
-                max-width: 60vw; /* Prevent scaling beyond 90% of viewport width */
-                max-height: 60vh; /* Prevent scaling beyond 90% of viewport height */
+                max-width: 80vw; /* Prevent scaling beyond 90% of viewport width */
+                max-height: 80vh; /* Prevent scaling beyond 90% of viewport height */
                 /*height: 100%;
                 width: auto;*/
             }
