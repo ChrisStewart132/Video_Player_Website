@@ -1,0 +1,184 @@
+<html>
+    <head>
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <!--<link rel="stylesheet" href="styles/styles.css">-->
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                background-color: black;
+                color: white;
+                font-family: Arial, sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                overflow: auto; /* Allow scrolling */
+            }
+
+            main {
+                width: 100%;
+                max-width: 1200px; /* Maximum width to prevent it from being too wide on large screens */
+                padding: 20px;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px; /* Space between video containers */
+            }
+
+            .container {
+                background-color: #0f0f0fcb; /* Darker background for the container */
+                border: 1px solid white;
+                border-radius: 5px;
+                padding: 5px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Subtle shadow for depth */
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 80vw; /* Width as a percentage of viewport width */
+                height: 80vw; /* Height as a percentage of viewport width, maintains aspect ratio */
+                max-width: 300px; /* Max width constraint */
+                max-height: 200px; /* Max height constraint */
+                overflow: hidden; /* Hide overflow to ensure videos fit within container */
+                transition: transform 0.3s ease, z-index 0s ease; /* Smooth transition for scaling */
+                position: relative; /* Needed for z-index to work */
+                transform-origin: center; /* Scale from the center */
+            }
+
+            .container.expanded {
+                position: absolute; /* Ensure it can be positioned relative to the viewport */
+                top: 50%; /* Center vertically */
+                left: 50%; /* Center horizontally */
+                transform: translate(-50%, -50%) scale(1.0); /* Scale and move to the center of the viewport */
+                z-index: 10; /* Ensure it appears above other containers */
+                max-width: 60vw; /* Prevent scaling beyond 90% of viewport width */
+                max-height: 60vh; /* Prevent scaling beyond 90% of viewport height */
+                /*height: 100%;
+                width: auto;*/
+            }
+
+            video {
+                width: auto;
+                height: 100%; /* Maintain aspect ratio */
+                transition: opacity 0.3s ease; /* Smooth transition for opacity changes */
+                opacity: 1; 
+            }
+
+            .container.expanded video {
+                opacity: 1; 
+            }
+
+            .container video {
+                opacity: 1; 
+            }
+        </style>
+    </head>
+    <body>
+        <main>
+            <!-- Video containers will be dynamically inserted here -->
+        </main>
+    </body>
+    <script>
+        const main_element = document.querySelector("main");
+        let video_elements = []; // Array to hold both container and video element
+
+        function get_video_count() {
+            fetch('/api/video_count')
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    const video_count = data.video_count;
+                    load_videos(video_count);
+                })
+                .catch(error => console.error('Error fetching video count:', error));
+        }
+
+        function load_videos(video_count) {
+            let delay = 0;
+            for (let i = 0; i < video_count; i++) {
+                setTimeout(() => {
+                    const container = document.createElement('div');
+                    container.classList.add('container');
+                    const video_element = document.createElement('video');
+                    video_element.controls = true;
+                    video_element.autoplay = false; // Start with autoplay off
+                    container.appendChild(video_element);
+                    main_element.appendChild(container);
+                    video_elements.push({ container, video_element }); // Store both container and video element
+                    load_video(video_element, container, i);
+                }, delay);
+                delay += 200; // Delay in ms
+            }
+        }
+
+        function load_video(video_element, container, index) {
+            video_element.src = `/api/get_video/${index}`;
+            //video_element.controls = false;
+            video_element.addEventListener('ended', () => {
+                play_next_video(index);
+            });
+            video_element.addEventListener('play', () => {
+                highlight_video(index);
+            });
+            video_element.addEventListener('pause', () => {
+                remove_highlight_from_all();
+            });
+        }
+
+        function stop_all_videos_except(except_index) {
+            video_elements.forEach((item, index) => {
+                if (index !== except_index) {
+                    item.video_element.pause();
+                }
+            });
+        }
+
+
+        function play_next_video(current_index) {            
+            const next_index = current_index + 1;
+            if (next_index < video_elements.length) {
+                video_elements[next_index].video_element.play(); // Play the next video
+            } else {
+                video_elements[0].video_element.play(); // Play the first video
+            }
+        }
+
+        function highlight_video(index) {
+            //stop_all_videos_except(index); // Stop all videos first
+            remove_highlight_from_all();
+            const container = video_elements[index].container;
+            container.classList.add('expanded'); // Add expanded class to container
+
+            // Define the offset you want (e.g., 500px)
+            const offset = 500;
+
+            // Calculate the current top position of the container relative to the viewport
+            const containerTop = container.getBoundingClientRect().top;
+            // Calculate the scroll position with the offset
+            const offsetTop = containerTop + window.scrollY - offset;
+
+            // Scroll to the calculated position
+            window.scrollTo({
+                top: offsetTop,
+                behavior: 'smooth'
+            });
+
+        }
+
+        function remove_highlight_from_all() {
+            video_elements.forEach(({ container }) => {
+                container.classList.remove('expanded'); // Remove expanded class from all containers
+            });
+        }
+
+        function main() {
+            get_video_count();
+        }
+        main();
+    </script>
+</html>
