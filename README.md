@@ -1,5 +1,5 @@
 # MEDIA WEBSITE
-html website with a python backend for playing videos stored in /assets/videos
+html website with a python backend for playing videos stored in docs/assets/videos
 
 # HOSTING 
 python .\backend.py
