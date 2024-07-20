@@ -1,5 +1,5 @@
 # MEDIA WEBSITE
-html website with a python backend for playing videos stored in docs/assets/videos
+Video playing website with HTML frontend and python backend, simply add .mp4 videos to docs/assets/videos, host the server, and visit the addr.
 
 # HOSTING 
 python .\backend_multithreaded.py
